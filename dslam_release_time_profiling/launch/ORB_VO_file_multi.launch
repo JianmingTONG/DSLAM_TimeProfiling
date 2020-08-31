@@ -1,0 +1,182 @@
+<?xml version="1.0"?>
+<launch>
+<arg name="gemweightspath" value="/home/jimmy/work/ROS_work/DSLAM_one/src/ROS-DSLAM/script/ROS_GEM/weights/gem.pth" />
+<arg name="datasetpath" value="/home/jimmy/work/ROS_work/dataset/image_503_loop/" />
+<!-- <arg name="gemweightspath" value="/home/yujc/robotws/DSLAM_one/src/ROS-DSLAM/script/ROS_GEM/weights/gem.pth" /> -->
+<!-- <arg name="datasetpath" value="/home/yujc/robotws/dataset/image_503_loop/" /> -->
+
+<arg name="robotid3" value="3" />
+<arg name="framestart3" value="1" />
+<arg name="frameend3" value="1700" />
+<arg name="robotid2" value="2" />
+<arg name="framestart2" value="1200" />
+<arg name="frameend2" value="2874" />
+
+  <node name="publish3" pkg="dslam_sp" required="false" type="publish_merge" args="-p $(arg datasetpath) -i $(arg robotid3) -s $(arg framestart3) -e $(arg frameend3)" output="screen">
+    <remap from="/merge/img_depth_file" to="/robot3/merge/img_depth_file" />
+    <remap from="/mynteye/left_rect/image" to="/robot3/mynteye/left_rect/image" />
+    <remap from="/mynteye/left_rect/depth" to="/robot3/mynteye/left_rect/depth" />
+  </node>
+
+  
+  <node name="publish2" pkg="dslam_sp" required="false" type="publish_merge" args="-p $(arg datasetpath) -i $(arg robotid2) -s $(arg framestart2) -e $(arg frameend2)" output="screen">
+    <remap from="/merge/img_depth_file"  to="/robot2/merge/img_depth_file" />
+    <remap from="/mynteye/left_rect/image" to="/robot2/mynteye/left_rect/image" />
+    <remap from="/mynteye/left_rect/depth" to="/robot2/mynteye/left_rect/depth" />
+  </node>
+  
+  <node name="sp_ORB3" pkg="dslam_sp" required="true" type="orb_EF" output="screen">
+    <remap from="image" to="/robot3/merge/img_depth_file" />
+    <remap from="/orb_EF/featurepoints_descriptors" to="/robot3/orb_EF/featurepoints_descriptors" />
+  </node>
+
+  
+  <node name="vo3" pkg="dslam_sp" required="true" type="visual_odometry_orb" output="screen">
+    <remap from="feature" to="/robot3/orb_EF/featurepoints_descriptors" />
+    <remap from="/visual_odometry/transform_relative" to="/robot3/visual_odometry/transform_relative" />
+    <remap from="/visual_odometry/transform_relative_with_image" to="/robot3/visual_odometry/transform_relative_with_image" />
+  </node>
+
+  <node name="gen_tf3" pkg="dslam_sp" required="true" type="generate_track_multi_node.py" args ="-i $(arg robotid3)" output="log">
+    <remap from="relpose" to="/robot3/visual_odometry/transform_relative_with_image" />
+    <remap from="posearray" to="/robot3/posearray" />
+    <remap from="looppose" to="/robot3/looppose"/>
+    <remap from="/pose_with_image" to="/robot3/pose_with_image"/>
+  </node>
+
+  <node name="pointcloud3" pkg="dslam_sp" required="true" type="rgbd2pointcloud" output="log">
+    <remap from="data" to="/robot3/pose_with_image" />
+    <!-- <remap from="/pointcloud_part_local" to="/robot3/pointcloud_part_local" /> -->
+  </node>
+
+  <node name="octomap_server3" pkg="octomap_server" type="multi_octomap_server_node" output="log">
+
+    <!-- resolution in meters per pixel -->
+    <param name="resolution" value="0.25" />
+
+    <!-- name of the fixed frame, needs to be "/map" for SLAM -->
+    <param name="frame_id" type="string" value="/map3" />
+
+    <!-- max range / depth resolution of the kinect in meter -->
+    <param name="sensor_model/max_range" value="100.0" />
+    <param name="latch" value="true" />
+
+    <!-- <param name="filter_ground" value="true" /> -->
+
+    <!-- max/min height for occupancy map, should be in meters -->
+    <param name="pointcloud_max_z" value="1000" />
+    <param name="pointcloud_min_z" value="-1000" />
+
+    <!-- topic from where pointcloud2 messages are subscribed -->
+    <remap from="/cloud_in" to="/pointcloud_part_local" />
+    <remap from="/octomap_in" to="/robot3/octomap_in" />
+    <remap from="/projected_map" to="/robot3/projected_map" />
+    <remap from="/octomap_binary" to="/robot3/octomap_binary" />
+ 
+  </node>
+
+
+  <node name="sp_ORB2" pkg="dslam_sp" required="true" type="orb_EF" output="screen">
+    <remap from="image" to="/robot2/merge/img_depth_file" />
+    <remap from="/orb_EF/featurepoints_descriptors" to="/robot2/orb_EF/featurepoints_descriptors" />
+  </node>
+
+  
+  <node name="vo2" pkg="dslam_sp" required="true" type="visual_odometry_orb" output="screen">
+    <remap from="feature" to="/robot2/orb_EF/featurepoints_descriptors" />
+    <remap from="/visual_odometry/transform_relative" to="/robot2/visual_odometry/transform_relative" />
+    <remap from="/visual_odometry/transform_relative_with_image" to="/robot2/visual_odometry/transform_relative_with_image" />
+  </node>
+
+  <node name="gen_tf2" pkg="dslam_sp" required="true" type="generate_track_multi_node.py" output="log" args=" -i $(arg robotid2)">
+    <remap from="relpose" to="/robot2/visual_odometry/transform_relative_with_image" />
+    <remap from="posearray" to="/robot2/posearray" />
+    <remap from="looppose" to="/robot2/looppose"/>
+    <remap from="/pose_with_image" to="/robot2/pose_with_image"/>
+  </node>
+
+  <node name="pointcloud2" pkg="dslam_sp" required="true" type="rgbd2pointcloud" output="log">
+    <remap from="data" to="/robot2/pose_with_image" />
+    <!-- <remap from="/pointcloud_part_local" to="/robot2/pointcloud_part_local" /> -->
+  </node>
+
+  <node name="octomap_server2" pkg="octomap_server" type="multi_octomap_server_node" output="log">
+
+    <!-- resolution in meters per pixel -->
+    <param name="resolution" value="0.25" />
+
+    <!-- name of the fixed frame, needs to be "/map" for SLAM -->
+    <param name="frame_id" type="string" value="/map2" />
+
+    <!-- max range / depth resolution of the kinect in meter -->
+    <param name="sensor_model/max_range" value="100.0" />
+    <param name="latch" value="true" />
+
+    <!-- <param name="filter_ground" value="true" /> -->
+
+    <!-- max/min height for occupancy map, should be in meters -->
+    <param name="pointcloud_max_z" value="1000" />
+    <param name="pointcloud_min_z" value="-1000" />
+
+    <!-- topic from where pointcloud2 messages are subscribed -->
+    <remap from="/cloud_in" to="/pointcloud_part_local" />
+    <remap from="/octomap_in" to="/robot2/octomap_in" />
+    <remap from="/projected_map" to="/robot2/projected_map" />
+    <remap from="/octomap_binary" to="/robot2/octomap_binary" />
+ 
+  </node>
+
+  <node name="gem_extract3" pkg="dslam_sp" required="true" type="extract_feature_ros.py"  args="-w $(arg gemweightspath)" output="log" >
+    <remap from="PRrepresentor" to="/robot3/GEM_PRrepresentor" />
+    <remap from="/merge/img_depth_file" to="/robot3/merge/img_depth_file" />
+  </node>
+
+  <node name="gem_extract2" pkg="dslam_sp" required="true" type="extract_feature_ros.py"  args="-w $(arg gemweightspath)" output="log" >
+    <remap from="PRrepresentor" to="/robot2/GEM_PRrepresentor" />
+    <remap from="/merge/img_depth_file" to="/robot2/merge/img_depth_file" />
+  </node>
+
+
+  <node name="gem_receiver3" pkg="dslam_sp" required="true" type="receiver_ros_multi.py" args=" -i $(arg robotid3)" output="log">
+    <remap from="PRrepresentor" to="/robot3/GEM_PRrepresentor" />
+    <remap from="OtherPresentor" to="/robot2/GEM_PRrepresentor" />
+    <remap from="/robot3/loopfnames" to="/robot3/loopstring" />
+    <!-- <remap from="looppose" to="GEM_LOOPS" /> -->
+  </node>
+
+  
+  <node name="gem_receiver2" pkg="dslam_sp" required="true" type="receiver_ros_multi.py" args=" -i $(arg robotid2)" output="log">
+    <remap from="PRrepresentor" to="/robot2/GEM_PRrepresentor" />
+    <remap from="OtherPresentor" to="/robot3/GEM_PRrepresentor" />
+    <remap from="/robot2/loopfnames" to="/robot2/loopstring" />
+    <!-- <remap from="looppose" to="GEM_LOOPS" /> -->
+  </node>
+
+
+  <node name="loop_str_frames3" pkg="dslam_sp" required="true" type="string2frame.py" args="-p $(arg datasetpath) -i $(arg robotid3)" output="screen">
+    <remap from="loopstring" to="/robot3/loopstring" />
+    <remap from="loopframe" to="/robot3/loopframe" />
+    
+  </node>
+
+  <node name="loop_frames3" pkg="dslam_sp" required="true" type="vo_loop_frames_orb" output="screen">
+    <remap from="loopframes" to="/robot3/loopframe" />
+    <remap from="VO_loop_relpose" to="/robot3/looppose" />
+  </node>
+
+
+  <node name="loop_str_frames2" pkg="dslam_sp" required="true" type="string2frame.py" args="-p $(arg datasetpath) -i $(arg robotid2)" output="screen">
+    <remap from="loopstring" to="/robot2/loopstring" />
+    <remap from="loopframe" to="/robot2/loopframe" />
+    
+  </node>
+
+  <node name="loop_frames2" pkg="dslam_sp" required="true" type="vo_loop_frames_orb" output="screen">
+    <remap from="loopframes" to="/robot2/loopframe" />
+    <remap from="VO_loop_relpose" to="/robot2/looppose" />
+  </node>
+
+  <node name="rviz" pkg="rviz" required="true" type="rviz" output="screen"/>
+  <node name="rviz2" pkg="rviz" required="true" type="rviz" output="screen"/>
+
+</launch>
