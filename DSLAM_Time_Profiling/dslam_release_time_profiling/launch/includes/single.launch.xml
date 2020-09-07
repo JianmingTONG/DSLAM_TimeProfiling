@@ -1,0 +1,89 @@
+<?xml version="1.0"?>
+<launch>
+<arg name="gemweightspath" value="/home/jimmy/work/ROS_work/DSLAM_one/src/ROS-DSLAM/script/ROS_GEM/weights/gem.pth" />
+<arg name="datasetpath" value="/home/jimmy/work/ROS_work/dataset/image_503_loop/pic" />
+<arg name="robotid" default="1" />
+<arg name="framestart" default="1" />
+<arg name="frameend" default="1700" />
+
+  <node name="publish" pkg="dslam_sp" required="false" type="publish_merge" args="-p $(arg datasetpath) -i $(arg robotid) -s $(arg framestart) -e $(arg frameend)" output="screen">
+    <remap from="/merge/img_depth_file" to="merge/img_depth_file" />
+    <remap from="/mynteye/left_rect/image" to="mynteye/left_rect/image" />
+    <remap from="/mynteye/left_rect/depth" to="mynteye/left_rect/depth" />
+  </node>
+
+  <node name="sp_ORB" pkg="dslam_sp" required="true" type="orb_EF" output="screen">
+    <remap from="image" to="merge/img_depth_file" />
+    <remap from="/orb_EF/featurepoints_descriptors" to="orb_EF/featurepoints_descriptors" />
+  </node>
+
+  
+  <node name="vo" pkg="dslam_sp" required="true" type="visual_odometry_orb" output="screen">
+    <remap from="feature" to="orb_EF/featurepoints_descriptors" />
+    <remap from="/visual_odometry/transform_relative" to="visual_odometry/transform_relative" />
+    <remap from="/visual_odometry/transform_relative_with_image" to="visual_odometry/transform_relative_with_image" />
+  </node>
+
+  <node name="gen_tf" pkg="dslam_sp" required="true" type="generate_track_multi_node.py" args ="-i $(arg robotid)" output="log">
+    <remap from="relpose" to="visual_odometry/transform_relative_with_image" />
+    <remap from="posearray" to="posearray" />
+    <remap from="looppose" to="looppose"/>
+    <remap from="/pose_with_image" to="pose_with_image"/>
+  </node>
+
+
+  <node name="gem_extract" pkg="dslam_sp" required="true" type="extract_feature_ros.py"  args="-w $(arg gemweightspath)" output="log" >
+    <remap from="PRrepresentor" to="/GEM_PRrepresentor" />
+    <remap from="/merge/img_depth_file" to="merge/img_depth_file" />
+  </node>
+
+  <node name="gem_receiver" pkg="dslam_sp" required="true" type="receiver_ros_multi.py" args=" -i $(arg robotid)" output="log">
+    <remap from="PRrepresentor" to="/GEM_PRrepresentor" />
+    <remap from="loopfnames" to="loopstring" />
+    <!-- <remap from="looppose" to="GEM_LOOPS" /> -->
+  </node>
+
+
+  <node name="loop_str_frames" pkg="dslam_sp" required="true" type="string2frame.py" args="-p $(arg datasetpath) -i $(arg robotid)" output="log">
+    <remap from="loopstring" to="loopstring" />
+    <remap from="loopframe" to="loopframe" />
+    
+  </node>
+
+  <node name="loop_frames" pkg="dslam_sp" required="true" type="vo_loop_frames_orb" output="screen">
+    <remap from="loopframes" to="loopframe" />
+    <remap from="VO_loop_relpose" to="looppose" />
+  </node>
+
+  <node name="pointcloud" pkg="dslam_sp" required="true" type="rgbd2pointcloud" output="log">
+    <remap from="data" to="pose_with_image" />
+    <remap from="/pointcloud_part_local" to="/pointcloud_part_local" />
+  </node>
+
+  <node name="octomap_server" pkg="octomap_server" type="multi_octomap_server_node" output="log">
+
+    <!-- resolution in meters per pixel -->
+    <param name="resolution" value="0.25" />
+
+    <!-- name of the fixed frame, needs to be "/map" for SLAM -->
+    <param name="frame_id" type="string" value="/map$(arg robotid)" />
+
+    <!-- max range / depth resolution of the kinect in meter -->
+    <param name="sensor_model/max_range" value="100.0" />
+    <param name="latch" value="true" />
+
+    <!-- <param name="filter_ground" value="true" /> -->
+
+    <!-- max/min height for occupancy map, should be in meters -->
+    <param name="pointcloud_max_z" value="1000" />
+    <param name="pointcloud_min_z" value="-1000" />
+
+    <!-- topic from where pointcloud2 messages are subscribed -->
+    <remap from="cloud_in" to="/pointcloud_part_local" />
+    <remap from="octomap_in" to="octomap_in" />
+    <remap from="projected_map" to="projected_map" />
+    <remap from="octomap_binary" to="octomap_binary" />
+ 
+  </node>
+
+</launch>
