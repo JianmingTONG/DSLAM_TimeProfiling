@@ -29,3 +29,6 @@ Download the package and place it inside the ```/src``` folder in your workspace
 ```sh
 roslaunch rrt_exploration_tutorials single_simulated_house.launch
 ```
+
+## 4. Update
+Note: The kobuki cannot be installed using the aformentioned methods. Pls google the another method.

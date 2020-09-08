@@ -15,16 +15,21 @@ The relative poses and transformations are manually setup in the .launch file. M
 - setup a catkin_workspace and put this repo under the src directory.
 - Run the following code in terminal
 ```
-roslaunch rrt_exploration_tutorial mutliple_simulated_largeMap.launch
+roslaunch rrt_exploration_tutorial multiple_simulated_house.launch
 // use RVIZ Goal button to select the goal point of different robots to start exploration.
 ```
-Have Fun :)
+
 
 ## Todo 
 Fixed the existed bug as follows:
 ```
-// temrinal 1
-roslaunch rrt_exploration_tutorial mutliple
+// terminal 1
+roslaunch rrt_exploration_tutorial multiple_simulated_house.launch
 [ERROR] [1599358014.226781998, 4461.600000000]: The goal pose passed to this planner must be in the robot_2/map frame.  It is instead in the robot_1/map frame.
 [ERROR] [1599358014.226809777, 4461.600000000]: The goal pose passed to this planner must be in the robot_3/map frame.  It is instead in the robot_1/map frame.
+// terminal 2
+roslaunch rrt_exploration three_robot.launch
+// click four points to construct a rectangle using "publish point" button.
+// click one point as the goad of robots in rviz using "publish point" button.
 ```
+Have Fun :)

@@ -15,7 +15,7 @@ The relative poses and transformations are manually setup in the .launch file. M
 - setup a catkin_workspace and put this repo under the src directory.
 - Run the following code in terminal
 ```
-roslaunch rrt_exploration_tutorial mutliple_simulated_largeMap.launch
+roslaunch rrt_exploration_tutorial multiple_simulated_largeMap.launch
 // use RVIZ Goal button to select the goal point of different robots to start exploration.
 ```
 Have Fun :)
