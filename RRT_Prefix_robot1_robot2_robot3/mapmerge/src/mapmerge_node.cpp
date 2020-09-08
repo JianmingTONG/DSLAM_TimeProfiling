@@ -72,10 +72,10 @@ int main(int argc, char **argv){
   //rviz 显示map1,map2,map_merge
 	ros::init(argc,argv,"map_merge");
 	ros::NodeHandle n;
-  ros::Publisher pub=n.advertise<nav_msgs::OccupancyGrid>("/map_merge/map",1000);
-  ros::Subscriber sub1= n.subscribe("/robot1/map", 100 ,mapCallBack1);	
-  ros::Subscriber sub2= n.subscribe("/robot2/map", 100 ,mapCallBack2);
-  ros::Subscriber sub3= n.subscribe("/robot3/map", 100 ,mapCallBack3);
+  ros::Publisher pub=n.advertise<nav_msgs::OccupancyGrid>("/map_merge/map",10);
+  ros::Subscriber sub1= n.subscribe("/robot1/map", 10 ,mapCallBack1);	
+  ros::Subscriber sub2= n.subscribe("/robot2/map", 10 ,mapCallBack2);
+  ros::Subscriber sub3= n.subscribe("/robot3/map", 10 ,mapCallBack3);
 	ros::Rate loop_rate(100);
 
   // prefetch the param
@@ -94,10 +94,6 @@ int main(int argc, char **argv){
   ROS_INFO("robot2_x: %3.1f", robot2_x);
   ROS_INFO("robot3_x: %3.1f", robot3_x);
 
-	// ros::Subscriber sub=n.subscribe("show_topic",1000,show_callback);
-
-  //我把消息全部变成全局变量了，方便在函数声明中调用
-	//int count=0;
   nav_msgs::OccupancyGrid merged_map;
   nav_msgs::OccupancyGrid result;
   result.header.frame_id="robot1/map";
@@ -121,8 +117,8 @@ int main(int argc, char **argv){
   transform.push_back(robot1_x);   // rosparam
   transform.push_back(robot1_y);   // rosparam
   
-  transform.push_back(robot2_x);  // rosparam
-  transform.push_back(robot2_y);  // rosparam
+  transform.push_back(robot2_x);   // rosparam
+  transform.push_back(robot2_y);   // rosparam
 
   transform.push_back(robot3_x);   // rosparam
   transform.push_back(robot3_y);   // rosparam：缺少旋转。
@@ -136,26 +132,11 @@ int main(int argc, char **argv){
     temp1.push_back(mapData1);
     temp1.push_back(mapData2); 
     temp1.push_back(mapData3);     
-      //merged_map=
-    ros::spinOnce();
+
     merge(result,temp1,transform);
     pub.publish(result);
     loop_rate.sleep();
 	}
 
-
-  // ros::init(argc, argv, "map_merge");
-  // // this package is still in development -- start wil debugging enabled
-  // 	if (ros::console::set_logger_level(ROSCONSOLE_DEFAULT_NAME,
-  //                                    ros::console::levels::Debug)) {
-  //   ros::console::notifyLoggerLevelsChanged();
-  // 	}
-  // 	map_merge::MapMerge map_merging;
-	//设置参数
-	//map_merging.subscriptions_size_=2;
-
-  
-	  
-	//map_merging.spin();
 	return 0;
 }
