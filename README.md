@@ -4,5 +4,5 @@ This repo consist of several subfunctions.
 2. Rapidly-exploration Random Tree (RRT) Deployment on single car in the unknown environment.
 Note: Detail of each repo please go to the corresponding subdirectory and check README.md there out.
 3. Three robots explore the unknown environment manually. 
-
+4. Working Repo, all the robots are named by robot<num> instead of robot_<num>.
 Have Fun :)
