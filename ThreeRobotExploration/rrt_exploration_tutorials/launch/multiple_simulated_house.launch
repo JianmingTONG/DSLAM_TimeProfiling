@@ -68,13 +68,11 @@ Launch file for running the multirobot simulation on gazebo
 <!-- Map megring (know inital position case)-->
 <!-- <include file="$(find mapmerge)/launch/mapmerge.launch" /> -->
 
-<!-- <node pkg="mapmerge" type="mapmerge_node" name="map_merge" output="screen"  >
+<node pkg="mapmerge" type="mapmerge_node" name="map_merge" output="screen"  >
 	<param name="robot1_x" value="0.0" />
 	<param name="robot2_x" value="0.0" />
-	<param name="robot3_x" value="0.0" />
 	<param name="robot1_y" value="0.0" />
 	<param name="robot2_y" value="-0.8" />
-	<param name="robot3_y" value="0.8" />
-</node> -->
+</node> 
 
 </launch>

@@ -19,9 +19,8 @@ The relative poses and transformations are manually setup in the .launch file. M
 roslaunch rrt_exploration_tutorial multiple_simulated_largeMap.launch
 // click two points in RVIZ which are the diagonal points of the rectangle region to explore
 // click one goal point in RVIZ to setup the goal of the robot.
+
 // Terminal 2
-roslaunch mapmerge mapmerge.launch
-// Terminal 3
 roslaunch rrt_exploration two_robots.launch
 ```
 Have Fun :)
