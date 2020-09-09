@@ -1,0 +1,27 @@
+# Overview
+
+This repo realizes controlling three robots to explore the unknown environment manually.
+
+## Environment
+PC: 
+- ubuntu 18.04
+- ROS melodic
+
+## Map Merge
+The relative poses and transformations are manually setup in the .launch file. Maps from all robots are merged together using the mapmerge_node in the mapmerge package. With respect to the [multirobot_map_merge](https://github.com/hrnr/m-explore) package (This package uses OpenCV libraries to merge maps from all different robots. The origin of the odometry is the center of the input map, for which the origin will changes the location when receiving different maps. However, as for the real robot in the simulation environment or in the real world, the origin of odometry is fixed all the time. As a result, the merged map will be invalid.) The new map merge is modified from [mapmerge package](https://github.com/donghl17/RRT-Github-Test). Maps from different robots are merged using ros-based msg type and functions. 
+
+## Ready to Run
+- change the '/home/jimmy/work/C_test/profiling' to any path you like.
+- setup a catkin_workspace and put this repo under the src directory.
+- Run the following code in terminal
+```
+// Terminal 1
+roslaunch rrt_exploration_tutorial multiple_simulated_largeMap.launch
+// click two points in RVIZ which are the diagonal points of the rectangle region to explore
+// click one goal point in RVIZ to setup the goal of the robot.
+// Terminal 2
+roslaunch mapmerge mapmerge.launch
+// Terminal 3
+roslaunch rrt_exploration two_robots.launch
+```
+Have Fun :)
