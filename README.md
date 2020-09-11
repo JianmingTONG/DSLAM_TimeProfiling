@@ -1,8 +1,14 @@
-# Overview
-This repo consist of several subfunctions.
-1. Time Profiling Project Source code
-2. Rapidly-exploration Random Tree (RRT) Deployment on single car in the unknown environment.
-Note: Detail of each repo please go to the corresponding subdirectory and check README.md there out.
-3. Three robots explore the unknown environment manually. 
-4. Working Repo, all the robots are named by robot<num> instead of robot_<num>.
-Have Fun :)
+
+# DSLAM Profiling Project
+
+Summary
+- Modified based on the [dslam release version](https://github.com/efc-robot/dslam_release).
+- Add time profiling part
+
+# Ready to run
+Modified the time_profiling_node.h in the 'dslam_release/include/' & 'octomap_server/include' following the steps below
+- change the '/home/jimmy/work/C_test/profiling' to any path you like. 
+- setup a catkin_workspace and put this repo under the src directory.
+- follow the instruction of [dslam release repo](https://github.com/efc-robot/dslam_release) to config the dslam_release_time_profiling package.
+- view the result in the TIME_PROFILING_PATH directory specified in time_profiling_node.h The time cost for executing the callback func was given.
+
